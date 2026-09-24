@@ -31,15 +31,35 @@ The watcher closes that gap by reading the document on a schedule.
 
 ## How to use
 
-### Set up a shortcut first
+### Save a standing instruction first
 
-The document name is long to say. Add this to your claude.ai preferences once:
+Without it, every spoken request would have to be:
 
-> When I say "send to Claude Code", add a comment addressed to Claude in the
-> document voice-mode-for-claude-code. When I say "read Claude Code's answer",
-> read Claude's latest reply in that document.
+> "In the voice-mode-for-claude-code document, leave a comment addressed to
+> Claude asking: run the tests."
 
-The phrases below assume this shortcut.
+With it, you only say:
+
+> "Send to Claude Code: run the tests."
+
+This is not a keyboard shortcut. It is an instruction for the Claude you talk to
+in voice mode, saved in your claude.ai personal preferences, which apply to
+every conversation, voice included.
+
+Where to save it: on claude.ai, open **Settings → Profile** and find the
+personal preferences field (the one that asks what Claude should consider in its
+responses). If your menu names it differently, use the field for personal
+instructions that apply to all conversations. Paste this, replacing
+`<your-document-link>` with the link from
+[step 2 of the installation](#2-create-the-document):
+
+> When I say "send to Claude Code", leave a comment addressed to Claude in the
+> document voice-mode-for-claude-code (`<your-document-link>`), containing the
+> request I say next. When I say "read Claude Code's answer", read aloud
+> Claude's latest reply in that document.
+
+The link lets voice mode find the right document without searching by name. The
+phrases below assume this instruction is saved.
 
 ### Speak a request
 
@@ -117,6 +137,9 @@ Copy the document link. It looks like
 
 Keep the document private. Anyone who can comment on it can send work to your
 PC.
+
+Then save the standing instruction with this link, as described in
+[Save a standing instruction first](#save-a-standing-instruction-first).
 
 ### 3. Check that headless Claude Code can read the document
 
