@@ -1,8 +1,8 @@
 # voice-mode-for-claude-code
 
-Since Anthropic does not allow voice mode to access local MCP tools like [filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
+Since Anthropic does not allow voice mode to access local MCP tools (like [filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)), I had to built this insane workaround.
 
-A voice bridge between Claude's voice mode on your phone and Claude Code on your
+This is a voice bridge between Claude's voice mode on your phone and Claude Code on your
 Windows PC.
 
 Voice mode leaves each request as a comment in a Claude Doc named
