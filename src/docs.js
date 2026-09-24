@@ -122,6 +122,26 @@ export async function queryComments(config, afterSeq) {
   return data.rows || [];
 }
 
+/** The live comments of one thread, oldest first. Deleted ones are left out. */
+export async function listThread(config, rootId) {
+  const data = await callDocsTool(config, "query", {
+    object: "utterance",
+    container: { kind: "project", id: config.docId },
+    payload: { under: { object: "utterance", id: rootId } },
+  });
+  const rows = data.rows || [];
+  const deleted = new Set(rows.filter((r) => r.verb === "delete").map((r) => r.id));
+  return rows.filter((r) => r.verb === "create" && !deleted.has(r.id)).sort((a, b) => a.seq - b.seq);
+}
+
+/** Delete a comment; deleting a thread's first comment removes the whole thread. */
+export async function deleteComment(config, id) {
+  return callDocsTool(config, "delete", {
+    ref: { object: "utterance", id },
+    container: { kind: "project", id: config.docId },
+  });
+}
+
 /** Start a thread anchored on `anchorText` in the tab body. Returns the new comment id. */
 export async function startThread(config, bodyId, anchorText, body) {
   const data = await callDocsTool(config, "create", {

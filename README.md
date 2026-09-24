@@ -23,8 +23,8 @@ Save this standing instruction in your claude.ai personal preferences
 (**Settings → Profile**). `npm run setup` prints it with your document's link
 and ids filled in:
 
-> When I say "send to Claude Code", leave a comment addressed to Claude in the
-> document voice-mode-for-claude-code (link: `<your-document-link>`; document
+> When I say "send to Claude Code", leave a comment addressed to Claude (field
+> to: ["claude"]) in the document voice-mode-for-claude-code (link: `<your-document-link>`; document
 > id: `<your-document-id>`; tab body id: `<your-tab-body-id>`), containing
 > the request I say next. When I say "read Claude Code's answer", read aloud
 > Claude's latest reply in that document.

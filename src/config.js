@@ -23,6 +23,9 @@ export const DEFAULTS = {
   dailyCap: 30,
   idleOffMinutes: 30,
   dedupeMinutes: 5,
+  // The document keeps only this many request threads and status replies.
+  keepThreads: 10,
+  keepStatusReplies: 10,
   pollModel: "haiku",
   // null = the user's default model.
   workerModel: null,

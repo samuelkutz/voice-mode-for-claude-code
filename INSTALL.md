@@ -52,8 +52,8 @@ instructions that apply to all conversations. `npm run setup`
 ([step 4](#4-run-setup)) prints this instruction with your link and ids filled
 in; paste what it prints. The template:
 
-> When I say "send to Claude Code", leave a comment addressed to Claude in the
-> document voice-mode-for-claude-code (link: `<your-document-link>`; document
+> When I say "send to Claude Code", leave a comment addressed to Claude (field
+> to: ["claude"]) in the document voice-mode-for-claude-code (link: `<your-document-link>`; document
 > id: `<your-document-id>`; tab body id: `<your-tab-body-id>`), containing
 > the request I say next. When I say "read Claude Code's answer", read aloud
 > Claude's latest reply in that document.
@@ -63,8 +63,11 @@ without searching. The phrases below assume this instruction is saved.
 
 ### Speak a request
 
-Every request becomes a comment in the document, addressed to Claude. The
-watcher ignores comments that are not addressed to Claude.
+Every request becomes a comment in the document. The watcher treats as a
+request any new thread started by your account, and any reply addressed to
+Claude, either in the `to` field or with the text starting "to: claude". Other
+replies are ignored, because sessions post their answers through your account
+too. So do not start threads in this document for anything else.
 
 | To | Say to voice mode |
 | --- | --- |
@@ -83,7 +86,7 @@ session, which you can open on the PC with `claude attach <id>`.
 
 | Note | Starts with (default Portuguese text) | Who posts it |
 | --- | --- | --- |
-| Receipt | "Recebido." (received) and the session it went to | The watcher, when it forwards the request |
+| Receipt | "Recebido." (received) | The watcher, just before it forwards the request |
 | Progress | "Andamento:" (progress) | The session, at each phase, for tasks longer than a minute |
 | Answer | "Terminei." (done) | The session, in three parts: what it did, the result, and whether it needs you |
 
@@ -185,6 +188,8 @@ Settings you can change in `config.json`:
 | `dailyCap` | `30` | Maximum requests forwarded per day |
 | `idleOffMinutes` | `30` | Stops after this long without a new request |
 | `workerModel` | `null` | Model for new sessions; `null` uses your default |
+| `keepThreads` | `10` | Request threads kept in the document; older ones are archived and deleted |
+| `keepStatusReplies` | `10` | Replies kept in the status thread |
 
 Run `setup` again after you add or remove claude.ai connectors.
 
@@ -206,16 +211,21 @@ To test without waiting, `npm run watch-once` does a single pass.
 3. Reads the comments from the tool's raw result, never from the model's text,
    and fails if the model did not make the call. Haiku sometimes skips the
    call; the watcher retries up to 3 times.
-4. Keeps comments that are addressed to Claude, written by you, and newer than
-   the last one it processed. Comments with the same text within 5 minutes count
-   once.
+4. Keeps comments written by you, newer than the last one it processed, that
+   start a new thread or are addressed to Claude. Deleted comments are skipped.
+   Comments with the same text within 5 minutes count once.
 5. For each request:
    - a reply inside a thread goes to the session that opened the thread,
      resuming it if it has ended;
    - a request that names a running session goes to that session, through the
      session's local named pipe;
    - anything else starts a new session with `claude --bg` in `workdir`.
-6. Posts "Received" in the thread and saves what it processed.
+6. Posts "Recebido" in the thread before forwarding, so the session's answer is
+   always the latest comment, and saves what it processed.
+7. Keeps the document small: when there are more than 10 request threads, it
+   copies the oldest one to `logs/archive.jsonl` and deletes it, skipping
+   threads whose session is still working. The status thread keeps its last 10
+   replies. A Claude Doc holds at most 1000 threads and 100 comments per thread.
 
 The watcher never executes a request itself. It only forwards.
 

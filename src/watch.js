@@ -4,6 +4,7 @@
 // "turn off the watcher", or with Ctrl+C.
 
 import { loadConfig } from "./config.js";
+import { trimStatus } from "./cleanup.js";
 import { postStatus } from "./docs.js";
 import { log } from "./log.js";
 import { acquireLock, loadState, refreshLock, releaseLock, saveState } from "./state.js";
@@ -34,6 +35,7 @@ async function stop(reason) {
   saveState(state);
   releaseLock();
   await postStatus(config, STOP_MESSAGES[reason](config)).catch(() => {});
+  await trimStatus(config).catch((err) => log(`status cleanup failed: ${err.message}`));
   process.exit(0);
 }
 // Ctrl+C, closing the window, or a stop from the Claude Code session running it.
@@ -41,6 +43,7 @@ for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(signal, () => s
 
 log(`watcher started, every ${config.intervalMinutes} min`);
 await postStatus(config, `Vigia ligado. Lendo o documento a cada ${config.intervalMinutes} minutos.`).catch(() => {});
+await trimStatus(config).catch((err) => log(`status cleanup failed: ${err.message}`));
 
 while (!stopping) {
   refreshLock();

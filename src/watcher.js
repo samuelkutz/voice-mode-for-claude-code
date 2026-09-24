@@ -3,6 +3,7 @@
 
 import crypto from "node:crypto";
 import { runClaude } from "./claude.js";
+import { pruneThreads } from "./cleanup.js";
 import { postReply, postStatus, queryComments } from "./docs.js";
 import { log } from "./log.js";
 import { workerPrompt } from "./prompt.js";
@@ -17,16 +18,23 @@ export const hhmm = (d) => d.toTimeString().slice(0, 5);
 const today = (d) => d.toLocaleDateString("sv-SE");
 const hash = (text) => crypto.createHash("sha1").update(text.trim().toLowerCase().replace(/\s+/g, " ")).digest("hex");
 
-function isRequest(row) {
+const TO_CLAUDE_TEXT = /^\s*(to|para)\s*:?\s*(o\s+)?claude\b/i;
+
+/**
+ * A request is a comment by the user's own account that either starts a new
+ * thread (neither sessions nor the watcher start threads, except the status
+ * thread) or is addressed to Claude. Voice mode sometimes writes "to: claude"
+ * in the text instead of filling the `to` field. Replies without an address
+ * are not requests: sessions post their answers through the same account.
+ */
+function isRequest(row, config) {
   const value = row.payload?.value;
-  return (
-    row.verb === "create" &&
-    row.actor?.self === true &&
-    Array.isArray(value?.to) &&
-    value.to.includes("claude") &&
-    typeof value.body === "string" &&
-    value.body.trim() !== ""
-  );
+  if (row.verb !== "create" || row.actor?.self !== true) return false;
+  if (typeof value?.body !== "string" || value.body.trim() === "") return false;
+  if (row.id === config.statusThreadId) return false;
+  const addressed = (Array.isArray(value.to) && value.to.includes("claude")) || TO_CLAUDE_TEXT.test(value.body);
+  const newThread = value.parent?.object === "node";
+  return addressed || newThread;
 }
 
 /** The comment that starts the thread: the parent comment for a reply, else the row itself. */
@@ -88,7 +96,7 @@ async function forward(config, state, row, sessions) {
   const target = namedSession(body, sessions);
   if (target) {
     await sendToSession(target, workerPrompt({ docId: config.docId, rootId, body }));
-    state.threads[rootId] = { sessionId: target.sessionId, name: target.name };
+    state.threads[rootId] = { sessionId: target.sessionId, name: target.name, createdAt: row.at };
     log(`thread ${rootId}: sent to named session ${target.name}`);
     return `Mandei para a sessão ${target.name}.`;
   }
@@ -101,7 +109,7 @@ async function forward(config, state, row, sessions) {
       : "";
   const name = `voz-${hhmm(new Date()).replace(":", "")}-${rootId.slice(0, 4)}`;
   const started = await startSession(config, { name, prompt: workerPrompt({ docId: config.docId, rootId, body, note }) });
-  state.threads[rootId] = { sessionId: started.sessionId, name };
+  state.threads[rootId] = { sessionId: started.sessionId, name, createdAt: row.at };
   log(`thread ${rootId}: new session ${name} (${started.shortId})`);
   return `Abri a sessão ${name}.`;
 }
@@ -120,7 +128,11 @@ export async function runOnce(config, state) {
 
   const rows = await queryComments(config, state.lastSeq);
   for (const row of rows) state.lastSeq = Math.max(state.lastSeq, row.seq);
-  const requests = rows.filter(isRequest).sort((a, b) => a.seq - b.seq);
+  // The history keeps the creation of comments that were deleted since.
+  const deleted = new Set(rows.filter((r) => r.verb === "delete").map((r) => r.id));
+  const requests = rows
+    .filter((r) => !deleted.has(r.id) && isRequest(r, config))
+    .sort((a, b) => a.seq - b.seq);
   log(`read ${rows.length} new rows, ${requests.length} requests`);
 
   const sessions = liveSessions();
@@ -146,17 +158,25 @@ export async function runOnce(config, state) {
       await postReply(config, rootId, `Limite de ${config.dailyCap} pedidos por dia atingido. O pedido não foi repassado.`);
       continue;
     }
+    // Acknowledge before forwarding: a quick session can answer within seconds,
+    // and its answer must be the latest comment in the thread, not the receipt.
+    await postReply(config, rootId, "Recebido. Repassando para o Claude Code.").catch((err) => log(`ack failed: ${err.message}`));
     try {
       const where = await forward(config, state, row, sessions);
       state.daily.count += 1;
-      saveState(state);
-      await postReply(config, rootId, `Recebido. ${where}`).catch((err) => log(`ack failed: ${err.message}`));
+      log(`comment ${row.id}: ${where}`);
     } catch (err) {
       log(`comment ${row.id}: failed: ${err.message}`);
       await postReply(config, rootId, "Não consegui repassar este pedido para o Claude Code. O motivo está no log do vigia, no PC.").catch(() => {});
     }
     // Save after each request, so a crash never forwards the same one twice.
     saveState(state);
+  }
+
+  try {
+    await pruneThreads(config, state);
+  } catch (err) {
+    log(`cleanup failed: ${err.message}`);
   }
   return null;
 }
