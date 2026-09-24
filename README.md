@@ -36,6 +36,12 @@ Status: working end to end on Windows 11; see the limitations in INSTALL.md.
 
 Usage and installation: [INSTALL.md](INSTALL.md).
 
+## TODO
+
+- Stop idle background sessions. Each request leaves its `claude --bg` session
+  running and idle on the PC (list them with `claude agents`). The cleanup that
+  archives and deletes an old thread should also stop that thread's session.
+
 ## Credits
 
 The message format the watcher writes to a running session's named pipe comes
