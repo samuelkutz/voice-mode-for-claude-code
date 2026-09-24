@@ -1,0 +1,15 @@
+{
+  "name": "voice-mode-for-claude-code",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Drive Claude Code on Windows from Claude's voice mode, through comments in a Claude Doc.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "setup": "node src/setup.js",
+    "watch": "node src/watch.js",
+    "watch-once": "node src/once.js"
+  }
+}
