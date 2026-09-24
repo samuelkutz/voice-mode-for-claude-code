@@ -48,17 +48,18 @@ every conversation, voice included.
 Where to save it: on claude.ai, open **Settings → Profile** and find the
 personal preferences field (the one that asks what Claude should consider in its
 responses). If your menu names it differently, use the field for personal
-instructions that apply to all conversations. Paste this, replacing
-`<your-document-link>` with the link from
-[step 2 of the installation](#2-create-the-document):
+instructions that apply to all conversations. `npm run setup`
+([step 4](#4-run-setup)) prints this instruction with your link and ids filled
+in; paste what it prints. The template:
 
 > When I say "send to Claude Code", leave a comment addressed to Claude in the
-> document voice-mode-for-claude-code (`<your-document-link>`), containing the
-> request I say next. When I say "read Claude Code's answer", read aloud
+> document voice-mode-for-claude-code (link: `<your-document-link>`; document
+> id: `<your-document-id>`; tab body id: `<your-tab-body-id>`), containing
+> the request I say next. When I say "read Claude Code's answer", read aloud
 > Claude's latest reply in that document.
 
-The link lets voice mode find the right document without searching by name. The
-phrases below assume this instruction is saved.
+The link and ids let voice mode find the right document and post the comment
+without searching. The phrases below assume this instruction is saved.
 
 ### Speak a request
 
@@ -146,8 +147,7 @@ Copy the document link. It looks like
 Keep the document private. Anyone who can comment on it can send work to your
 PC.
 
-Then save the standing instruction with this link, as described in
-[Save a standing instruction first](#save-a-standing-instruction-first).
+You save the standing instruction after step 4, which prints it for you.
 
 ### 3. Trust the folder where sessions start
 
@@ -171,7 +171,9 @@ npm run setup -- https://claude.ai/code/artifact/<document-id>
 
 `setup` reads the document once, finds its tab, records which MCP servers your
 Claude Code loads, creates the watcher status thread, and writes `config.json`,
-which git ignores. It also marks every existing comment as already seen.
+which git ignores. It also marks every existing comment as already seen, and
+prints the standing instruction with your ids: save it as described in
+[Save a standing instruction first](#save-a-standing-instruction-first).
 
 Settings you can change in `config.json`:
 

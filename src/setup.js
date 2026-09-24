@@ -56,3 +56,8 @@ state.lastSeq = rows.reduce((max, r) => Math.max(max, r.seq), 0);
 saveState(state);
 
 console.log(`config.json written: doc ${config.docId}, tab ${config.tabId}, MCP servers: ${config.mcpServers.join(", ")}; starting after comment seq ${state.lastSeq}.`);
+console.log(`
+Paste this into your claude.ai personal preferences (Settings > Profile):
+
+When I say "send to Claude Code", leave a comment addressed to Claude in the document voice-mode-for-claude-code (link: https://claude.ai/code/artifact/${config.docId}; document id: ${config.docId}; tab body id: ${tab.content.id}), containing the request I say next. When I say "read Claude Code's answer", read aloud Claude's latest reply in that document.
+`);
