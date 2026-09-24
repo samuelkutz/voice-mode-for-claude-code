@@ -62,16 +62,20 @@ async function callDocsToolOnce(config, tool, args, { withInit = false } = {}) {
     "-p", prompt,
     "--model", config.pollModel,
     "--output-format", "stream-json", "--verbose",
-    "--system-prompt", "You relay one tool call. Call the tool you are told to call, with the arguments given, then reply ok.",
-    "--tools", "",
+    "--system-prompt", "You relay one tool call. Use ToolSearch to load the tool if it is not loaded, call it with the arguments given, then reply ok.",
+    // ToolSearch is the only built-in tool. The claude.ai connectors are often
+    // still connecting when a headless run starts; without tool search the
+    // tool is simply absent, and the model writes a fake call as text. The
+    // search turn gives the connector time to come up.
+    "--tools", "ToolSearch",
     "--disable-slash-commands",
     "--no-session-persistence",
-    "--allowedTools", name,
+    "--allowedTools", name, "ToolSearch",
   ];
   if (denied.length) cliArgs.push("--disallowedTools", ...denied);
 
   const { code, stdout, stderr } = await runClaude(config.claudePath, cliArgs, {
-    env: { ENABLE_TOOL_SEARCH: "false" },
+    env: { ENABLE_TOOL_SEARCH: "true" },
   });
 
   const events = stdout

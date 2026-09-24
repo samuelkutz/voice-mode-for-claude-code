@@ -204,8 +204,11 @@ To test without waiting, `npm run watch-once` does a single pass.
 
 1. Stops after the idle limit.
 2. Runs a minimal headless Claude Code call with Haiku that can use one Claude
-   Docs tool and nothing else: no skills, no built-in tools, every other MCP
-   server denied. Each call is about 6,000 tokens.
+   Docs tool plus tool search, and nothing else: no skills, no other built-in
+   tools, every other MCP server denied. Each call is about 16,000 to 23,000
+   tokens. Tool search stays on because the claude.ai connectors are often
+   still connecting when a headless run starts; without it the tool is missing
+   from the run.
 3. Reads the comments from the tool's raw result, never from the model's text,
    and fails if the model did not make the call. Haiku sometimes skips the
    call; the watcher retries up to 3 times.
@@ -254,8 +257,8 @@ Everything counts against your Claude plan. On a subscription, usage inside
 your allowance is not billed in dollars; the dollar figures Claude Code shows
 are list-price estimates.
 
-- Each pass uses about 6,000 tokens of Haiku, so about 20 passes an hour while
-  the watcher runs.
+- Each pass uses about 16,000 to 23,000 tokens of Haiku, mostly cache reads, and
+  the watcher makes about 20 passes an hour while it runs.
 - Each new background session starts with a baseline of roughly 50,000 tokens
   of your default model, before any work.
 - Requests sent to a running session are cheap, because its prompt cache is
@@ -269,6 +272,7 @@ Check real usage with `/usage` in Claude Code.
 | --- | --- |
 | `claude --bg failed` in `logs/watcher.log` with "Workspace not trusted" | Trust `workdir`, as in [step 3](#3-trust-the-folder-where-sessions-start) |
 | "Another watcher is already running" | Only one watcher runs at a time. If none is running, delete `state/lock` |
+| "the model did not call" in the log | The Claude Docs connector was still connecting. Keep tool search on (the default in this project); the watcher retries 3 times |
 | Headless runs cannot see the Claude Docs connector | Do not use `--strict-mcp-config` or `--bare`: the first removes the claude.ai connectors, the second ignores the claude.ai sign-in |
 | The model changed unexpectedly | `--setting-sources ""` drops your model preference. Always pass `--model` |
 | A comment in the document did not wake a watching session | Expected. Only a person sending the thread to Claude wakes it; the watcher exists for this reason |
