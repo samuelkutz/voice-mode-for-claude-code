@@ -35,3 +35,10 @@ Claude Code's answer".
 Status: working end to end on Windows 11; see the limitations in INSTALL.md.
 
 Usage and installation: [INSTALL.md](INSTALL.md).
+
+## Credits
+
+The message format the watcher writes to a running session's named pipe comes
+from the protocol description in
+[S3cur3Th1sSh1t/claudemessaging](https://github.com/S3cur3Th1sSh1t/claudemessaging).
+No code was copied.
