@@ -1,0 +1,6 @@
+node_modules/
+# estado local do vigia (último seq processado, mapa tópico -> sessão)
+state/
+logs/
+*.log
+.env
