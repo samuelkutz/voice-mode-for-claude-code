@@ -115,12 +115,11 @@ async function forward(config, state, row, sessions) {
 }
 
 /**
- * One pass. Returns why the watcher should stop ("outside", "idle", "off"),
+ * One pass. Returns why the watcher should stop ("idle", "off"),
  * or null to keep going.
  */
 export async function runOnce(config, state) {
   const now = new Date();
-  if (hhmm(now) < config.windowStart || hhmm(now) >= config.windowEnd) return "outside";
   if (now - new Date(state.lastActivityAt || now) > minutes(config.idleOffMinutes)) return "idle";
 
   if (state.daily.date !== today(now)) state.daily = { date: today(now), count: 0 };

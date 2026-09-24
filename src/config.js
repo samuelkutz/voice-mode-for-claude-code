@@ -18,8 +18,6 @@ export const DEFAULTS = {
 
   workdir: path.resolve(ROOT, ".."),
   intervalMinutes: 3,
-  windowStart: "08:00",
-  windowEnd: "19:00",
   dailyCap: 30,
   idleOffMinutes: 30,
   dedupeMinutes: 5,

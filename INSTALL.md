@@ -110,8 +110,7 @@ and the watcher's own notes are in [src/watcher.js](src/watcher.js) and
   through voice mode does not work: while the watcher is off, nobody reads the
   document.
 - **Off:** say "Send to Claude Code: turn off the watcher", press Ctrl+C, or
-  wait. The watcher stops by itself after 30 minutes without a new request, and
-  outside 08:00 to 19:00.
+  wait. The watcher stops by itself after 30 minutes without a new request.
 - **Status:** the watcher reports "on" and "off" in a fixed status thread in the
   document.
 - **Cap:** it forwards at most 30 requests a day.
@@ -184,7 +183,6 @@ Settings you can change in `config.json`:
 | --- | --- | --- |
 | `workdir` | the parent folder of this repository | Where new sessions start; the session chooses the project |
 | `intervalMinutes` | `3` | How often the watcher reads the document |
-| `windowStart`, `windowEnd` | `08:00`, `19:00` | Hours when the watcher runs |
 | `dailyCap` | `30` | Maximum requests forwarded per day |
 | `idleOffMinutes` | `30` | Stops after this long without a new request |
 | `workerModel` | `null` | Model for new sessions; `null` uses your default |
@@ -204,7 +202,7 @@ To test without waiting, `npm run watch-once` does a single pass.
 
 ## What the watcher does on each pass
 
-1. Stops if the time is outside the configured hours, or after the idle limit.
+1. Stops after the idle limit.
 2. Runs a minimal headless Claude Code call with Haiku that can use one Claude
    Docs tool and nothing else: no skills, no built-in tools, every other MCP
    server denied. Each call is about 6,000 tokens.

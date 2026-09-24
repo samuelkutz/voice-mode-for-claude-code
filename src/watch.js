@@ -1,6 +1,6 @@
 // npm run watch
 // Reads the document every few minutes in this visible process. Stops by
-// itself after the idle limit, outside the time window, on a spoken
+// itself after the idle limit, on a spoken
 // "turn off the watcher", or with Ctrl+C.
 
 import { loadConfig } from "./config.js";
@@ -11,7 +11,6 @@ import { acquireLock, loadState, refreshLock, releaseLock, saveState } from "./s
 import { reportFailure, runOnce } from "./watcher.js";
 
 const STOP_MESSAGES = {
-  outside: (c) => `Vigia desligado: fora do horário, das ${c.windowStart} às ${c.windowEnd}.`,
   idle: (c) => `Vigia desligado depois de ${c.idleOffMinutes} minutos sem pedido.`,
   off: () => "Vigia desligado por pedido de voz.",
   interrupted: () => "Vigia desligado no PC.",
