@@ -1,17 +1,19 @@
 # voice-mode-for-claude-code
 
-Ponte de voz entre o voice mode do Claude no Android e o Claude Code no PC.
+A voice bridge between Claude's voice mode on your phone and Claude Code on your
+Windows PC.
 
-O voice mode deixa um pedido como comentário num documento do claude.ai
-chamado "voice-mode-for-claude-code". Um vigia no PC, disparado pelo Agendador
-de Tarefas do Windows, lê os comentários novos com um `claude -p` enxuto
-(Haiku) e entrega cada pedido a uma sessão do Claude Code: uma sessão nova em
-segundo plano (`claude --bg`), ou a sessão citada pelo nome, pelo named pipe
-dela. A sessão responde no mesmo tópico, num formato feito para ser ouvido, e o
-voice mode lê a resposta em voz alta.
+Voice mode leaves each request as a comment in a Claude Doc named
+`voice-mode-for-claude-code`. A watcher on the PC, started by Windows Task
+Scheduler, reads new comments with a minimal headless `claude -p` call (Haiku)
+and hands each request to a Claude Code session: a new background session
+(`claude --bg`), or a running session you name, through its local named pipe.
+The session replies in the same comment thread, in a format written to be heard,
+and voice mode reads the reply aloud.
 
-Tudo passa pelo claude.ai: não há túnel, servidor público nem porta aberta no PC.
+Everything goes through claude.ai: there is no tunnel, no public server and no
+open port on your PC.
 
-Estado: desenho fechado, implementação ainda não começou.
+Status: the design is final; the watcher is not implemented yet.
 
-Uso e instalação: [INSTALL.md](INSTALL.md).
+Usage and installation: [INSTALL.md](INSTALL.md).
